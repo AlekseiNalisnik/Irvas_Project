@@ -1,13 +1,10 @@
-const forms = () => {
-    const form = document.querySelectorAll('form'),
-          inputs = document.querySelectorAll('input'),
-          phoneInputs = document.querySelectorAll('input[name="user_phone"]');
+import checkNumInputs from './checkNumInputs';
+import clearInputs from './clearInputs';
 
-    phoneInputs.forEach(item => {
-        item.addEventListener('input', () => {
-            item.value = item.value.replace(/\D/, '');
-        });
-    });
+const forms = (state) => {
+    const form = document.querySelectorAll('form');
+
+    checkNumInputs('input[name="user_phone"]');
 
     const message = {
         loading: 'Загрузка...',
@@ -25,21 +22,24 @@ const forms = () => {
         return await res.text();
     };
 
-    const clearInputs = () => {
-        inputs.forEach(item => {
-            item.value = '';
-        });
-    };
-
     form.forEach(item => {
         item.addEventListener('submit', (event) => {
             event.preventDefault();
 
             let statusMessage = document.createElement('div');
             statusMessage.classList.add('status');
+            console.log(item);
             item.appendChild(statusMessage);
 
             const formData = new FormData(item);
+            if(item.getAttribute('data-calc') === 'end') {
+                for(let key in state) {
+                    formData.append(key, state[key]);
+                }
+                document.querySelector('.popup_calc_end').style.display = 'none';
+                document.body.style.overflow = '';
+                for (let item in state) delete state[item];
+            }
 
             postData('assets/server.php', formData)
                 .then(res => {
